@@ -1,0 +1,172 @@
+@import "tailwindcss";
+
+/* ============================================================
+   WeBuild Design Tokens — Neobrutalism (acuan cloud.mui.skin)
+   Bab 7c Master Plan. Dark navy untuk app; site user versi terang.
+   ============================================================ */
+:root {
+  --bg: #04101b;
+  --surface: #081b28;
+  --surface2: #0c2433;
+  --fg: #fff1c8;
+  --muted: #91aab2;
+  --accent: #f7cf76; /* kuning — CTA utama */
+  --accent-success: #64e6be; /* mint — publish/sukses */
+  --accent-danger: #e95f46; /* koral — error/lapor */
+  --ink: #061421;
+  --shadow-hard: #00070c;
+
+  --border-w: 2px;
+  --radius: 14px;
+  --radius-sm: 10px;
+
+  --font-heading: "Space Grotesk", system-ui, sans-serif;
+  --font-body: Inter, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Site hasil user — versi TERANG (bab 7c) */
+:root {
+  --site-bg: #fff8e7;
+  --site-header: #f7cf76;
+  --site-fg: #061421;
+  --site-muted: #3a5560;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface2: var(--surface2);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-success: var(--accent-success);
+  --color-accent-danger: var(--accent-danger);
+  --color-ink: var(--ink);
+  --color-site-bg: var(--site-bg);
+  --color-site-fg: var(--site-fg);
+  --font-sans: var(--font-body);
+  --font-heading: var(--font-heading);
+  --font-mono: var(--font-mono);
+  --shadow-hard: 4px 4px 0 var(--shadow-hard);
+  --shadow-hard-sm: 2px 2px 0 var(--shadow-hard);
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+/* ============================================================
+   Utility — pola komponen neobrutalism (bab 7c)
+   ============================================================ */
+.nb-border { border: var(--border-w) solid var(--ink); }
+.nb-radius { border-radius: var(--radius); }
+.nb-radius-sm { border-radius: var(--radius-sm); }
+.nb-shadow { box-shadow: 4px 4px 0 var(--shadow-hard); }
+.nb-shadow-sm { box-shadow: 2px 2px 0 var(--shadow-hard); }
+
+/* Tombol neobrutalism */
+.nb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: var(--border-w) solid var(--ink);
+  border-radius: var(--radius);
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.12s, box-shadow 0.12s;
+  font-family: var(--font-body);
+}
+.nb-btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--shadow-hard); }
+.nb-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--shadow-hard); }
+.nb-btn-primary { background: var(--accent); color: var(--ink); box-shadow: 4px 4px 0 var(--shadow-hard); }
+.nb-btn-mint { background: var(--accent-success); color: var(--ink); box-shadow: 4px 4px 0 var(--shadow-hard); }
+.nb-btn-ghost { background: var(--surface); color: var(--fg); box-shadow: 2px 2px 0 var(--shadow-hard); }
+.nb-btn:disabled { background: var(--surface2); color: var(--muted); box-shadow: none; cursor: not-allowed; transform: none; }
+
+/* Badge — kotak radius 0 ala INSTANT DEPLOY */
+.nb-badge {
+  display: inline-block;
+  border: var(--border-w) solid var(--ink);
+  border-radius: 0;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--ink);
+  box-shadow: 4px 4px 0 var(--accent-danger);
+}
+.nb-badge-yellow { background: var(--accent); }
+.nb-badge-mint { background: var(--accent-success); }
+.nb-badge-coral { background: var(--accent-danger); color: var(--fg); box-shadow: 4px 4px 0 var(--accent); }
+
+/* Kartu */
+.nb-card {
+  background: var(--surface);
+  border: var(--border-w) solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: 4px 4px 0 var(--shadow-hard);
+  padding: 1.5rem;
+}
+
+/* Form */
+.nb-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 5px;
+}
+.nb-field input, .nb-field textarea, .nb-field select {
+  width: 100%;
+  background: var(--ink);
+  border: 2px solid #1c3d52;
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 14px;
+  outline: none;
+}
+.nb-field input:focus, .nb-field textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 3px 3px 0 var(--accent);
+}
+
+/* Garis putus-putus pemisah section */
+.nb-dashed { border-top: 2px dashed rgba(40, 80, 100, 0.53); margin: 3rem 0; }
+
+/* Terminal panel (log/status) */
+.nb-terminal { background: var(--ink); border: var(--border-w) solid var(--ink); border-radius: var(--radius); box-shadow: 4px 4px 0 var(--shadow-hard); overflow: hidden; }
+.nb-terminal-bar { display: flex; gap: 8px; padding: 10px 14px; background: #0a1c2c; border-bottom: 2px solid #12293c; }
+.nb-terminal-body { padding: 16px; font-family: var(--font-mono); font-size: 13px; line-height: 1.8; color: #b8d0da; }
+
+/* ============================================================
+   Site hasil user — komponen versi terang
+   ============================================================ */
+.site-root { background: var(--site-bg); color: var(--site-fg); font-family: var(--font-body); }
+.site-root .s-hero-title span {
+  background: var(--accent-success);
+  padding: 0 12px;
+  border: 2px solid var(--site-fg);
+  border-radius: 10px;
+  display: inline-block;
+  box-shadow: 4px 4px 0 var(--site-fg);
+  transform: rotate(-1.5deg);
+}

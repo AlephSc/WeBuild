@@ -1,0 +1,45 @@
+// Prisma schema — WeBuild (Fase 1: users + plans; tabel lain menyusul per fase)
+// Keputusan desain: D4 (UUID), D5 (draft/published terpisah — ditambah di F3), D10 (provider konstanta kode)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum PlanName {
+  FREE
+  PLUS
+}
+
+model Plan {
+  id      String   @id @default(uuid()) @db.Uuid
+  name    PlanName @unique
+  limits  Json // {sites:1, aiPerDay:10, uploadMb:50, fileMb:2, revisions:5}
+  // PLUS: {sites:10, aiPerDay:50, uploadMb:500, fileMb:5, revisions:10}
+  users   User[]
+}
+
+model User {
+  id             String   @id @default(uuid()) @db.Uuid
+  name           String
+  email          String   @unique
+  passwordHash   String
+  role           Role     @default(USER)
+  planId         String?  @db.Uuid
+  plan           Plan?    @relation(fields: [planId], references: [id])
+  isActive       Boolean  @default(true)
+  tosAcceptedAt  DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([email])
+}

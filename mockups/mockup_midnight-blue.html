@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WeBuild Mockup — Midnight Blue</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B1220; --surface:#12203A; --surface2:#1A2E4F;
+  --fg:#E3EEFF; --muted:#8AA3C2;
+  --yellow:#7DD3FC; --mint:#34D399; --coral:#FB7185;
+  --ink:#08101E; --shadow:#030812;
+  --border:2px solid var(--ink);
+  --radius:14px;
+  --shadow-hard:4px 4px 0 var(--shadow);
+  --shadow-hard-sm:2px 2px 0 var(--shadow);
+  --font-head:'Space Grotesk',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.6}
+h1,h2,h3{font-family:var(--font-head);font-weight:700;line-height:1.15}
+.mono{font-family:var(--font-mono)}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+
+/* ============ TAB SWITCHER ============ */
+.tabs{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:var(--border);padding:10px 0}
+.tabbar{display:flex;gap:10px;max-width:1100px;margin:0 auto;padding:0 20px;flex-wrap:wrap}
+.tab{cursor:pointer;border:2px solid var(--ink);background:var(--surface);color:var(--fg);
+  padding:8px 16px;border-radius:10px;font-weight:600;font-size:14px;box-shadow:var(--shadow-hard-sm);
+  transition:all .12s}
+.tab:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0 var(--shadow)}
+.tab.active{background:var(--yellow);color:var(--ink);box-shadow:var(--shadow-hard)}
+.view{display:none;padding:40px 0 80px}
+.view.show{display:block}
+
+/* ============ BUTTONS ============ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border:2px solid var(--ink);border-radius:var(--radius);padding:12px 24px;
+  font-weight:600;font-size:15px;cursor:pointer;transition:all .12s;text-decoration:none;font-family:var(--font-body)}
+.btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--shadow)}
+.btn:active{transform:translate(2px,2px);box-shadow:var(--shadow-hard-sm)}
+.btn-primary{background:var(--yellow);color:var(--ink);box-shadow:var(--shadow-hard)}
+.btn-mint{background:var(--mint);color:var(--ink);box-shadow:var(--shadow-hard)}
+.btn-ghost{background:var(--surface);color:var(--fg);box-shadow:var(--shadow-hard-sm)}
+.btn-ghost:hover{box-shadow:4px 4px 0 var(--shadow)}
+
+/* ============ BADGES ============ */
+.badge{display:inline-block;border:2px solid var(--ink);padding:4px 12px;
+  font-size:12px;font-weight:600;letter-spacing:.5px;color:var(--ink);box-shadow:4px 4px 0 var(--coral)}
+.badge-yellow{background:var(--yellow)}
+.badge-mint{background:var(--mint)}
+.badge-coral{background:var(--coral);color:var(--fg);box-shadow:4px 4px 0 var(--yellow)}
+
+/* ============ CARDS ============ */
+.card{background:var(--surface);border:var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow-hard);padding:24px}
+.card-sm{box-shadow:var(--shadow-hard-sm);padding:16px}
+
+/* ============ LANDING ============ */
+.nav{display:flex;justify-content:space-between;align-items:center;padding:8px 0}
+.logo{font-family:var(--font-head);font-weight:700;font-size:24px;display:flex;align-items:center;gap:10px}
+.logo .mark{width:34px;height:34px;background:var(--yellow);border:var(--border);border-radius:8px;
+  display:grid;place-items:center;color:var(--ink);box-shadow:var(--shadow-hard-sm);font-size:18px}
+.hero{padding:70px 0 40px;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+.hero h1{font-size:56px;margin:18px 0 16px}
+.hero h1 .hl{background:var(--yellow);color:var(--ink);padding:0 10px;border-radius:8px;
+  border:var(--border);box-shadow:var(--shadow-hard-sm);display:inline-block;transform:rotate(-1deg)}
+.hero p{color:var(--muted);max-width:480px;margin-bottom:28px}
+.hero .ctas{display:flex;gap:14px;flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:50px 0}
+.stat{border:var(--border);border-radius:var(--radius);background:var(--surface);
+  box-shadow:var(--shadow-hard);padding:20px;position:relative}
+.stat .num{font-family:var(--font-head);font-size:36px;font-weight:700;color:var(--mint)}
+.stat .lbl{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.dashed{border-top:2px dashed #33578A88;margin:48px 0}
+.step-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.step .n{font-family:var(--font-mono);font-weight:600;font-size:14px;background:var(--ink);
+  color:var(--yellow);padding:4px 10px;border-radius:6px;display:inline-block;margin-bottom:12px}
+.step h3{font-size:18px;margin-bottom:6px}
+.step p{color:var(--muted);font-size:14px}
+.plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:760px;margin:0 auto}
+.plan-card{padding:28px}
+.plan-card.pop{background:var(--surface2);outline:2px solid var(--yellow);outline-offset:4px}
+.plan-card h3{font-size:22px}
+.plan-price{font-family:var(--font-head);font-size:40px;margin:10px 0;color:var(--yellow)}
+.plan-card.pop .plan-price{color:var(--mint)}
+.plan-card ul{list-style:none;margin:16px 0}
+.plan-card li{padding:6px 0;display:flex;gap:10px;align-items:center;font-size:15px}
+.plan-card li .ok{color:var(--mint);font-weight:700}
+.plan-card li .x{color:var(--coral)}
+.terminal{background:var(--ink);border:var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow-hard);overflow:hidden}
+.terminal .bar{display:flex;gap:8px;padding:10px 14px;background:#0E1C33;border-bottom:2px solid #1A2E4F}
+.terminal .dot{width:10px;height:10px;border-radius:50%}
+.terminal .body{padding:16px;font-family:var(--font-mono);font-size:13px;line-height:1.8;color:#B4CFEF}
+.terminal .line{opacity:.85}
+.terminal .prompt{color:var(--yellow)}
+.terminal .ok{color:var(--mint)}
+.terminal .dim{color:#64809F}
+
+/* ============ EDITOR ============ */
+.ed-topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;
+  border:var(--border);border-radius:var(--radius);background:var(--surface);
+  box-shadow:var(--shadow-hard-sm);padding:10px 16px;margin-bottom:18px;flex-wrap:wrap}
+.ed-topbar .crumb{font-family:var(--font-mono);font-size:13px;color:var(--muted)}
+.ed-topbar .crumb b{color:var(--yellow)}
+.ed-grid{display:grid;grid-template-columns:380px 1fr;gap:18px;align-items:start}
+.panel{border:var(--border);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow-hard-sm)}
+.panel-head{display:flex;justify-content:space-between;align-items:center;
+  padding:12px 16px;border-bottom:var(--border)}
+.panel-head h3{font-size:15px}
+.block-item{border-bottom:2px solid #1E3A5F;padding:14px 16px}
+.block-item:last-child{border-bottom:none}
+.block-item .bh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.block-item .bt{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--yellow)}
+.block-item .tools{display:flex;gap:6px}
+.mini-btn{width:28px;height:28px;border:2px solid var(--ink);border-radius:7px;
+  background:var(--surface2);color:var(--fg);cursor:pointer;font-size:13px;
+  box-shadow:2px 2px 0 var(--shadow);display:grid;place-items:center;transition:all .1s}
+.mini-btn:hover{transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--shadow)}
+.mini-btn.del:hover{background:var(--coral);color:var(--ink)}
+.field{margin:10px 0}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.field input,.field textarea,.field select{width:100%;background:var(--ink);border:2px solid #274B77;
+  border-radius:10px;padding:9px 12px;color:var(--fg);font-family:var(--font-body);font-size:14px;outline:none}
+.field input:focus{border-color:var(--yellow);box-shadow:3px 3px 0 var(--yellow)}
+.field textarea{resize:vertical;min-height:64px}
+.addblock{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px 16px}
+.addblock button{border:2px solid var(--ink);border-radius:10px;background:var(--surface2);
+  color:var(--fg);padding:8px 4px;font-size:12px;font-weight:600;cursor:pointer;
+  box-shadow:2px 2px 0 var(--shadow);transition:all .1s}
+.addblock button:hover{background:var(--yellow);color:var(--ink);transform:translate(-1px,-1px)}
+.preview-frame{border:var(--border);border-radius:var(--radius);background:#EFF6FF;overflow:hidden;
+  box-shadow:var(--shadow-hard);min-height:560px}
+.preview-frame .pbar{display:flex;align-items:center;gap:10px;background:#D6E9FF;
+  border-bottom:2px solid var(--ink);padding:8px 14px}
+.pbar .url{flex:1;background:#fff;border:2px solid var(--ink);border-radius:8px;
+  padding:5px 12px;font-family:var(--font-mono);font-size:12px;color:#08101E}
+.pbar .vp{display:flex;gap:4px}
+.vp button{border:2px solid var(--ink);background:#fff;border-radius:6px;padding:4px 8px;
+  font-size:11px;cursor:pointer;font-weight:600}
+.vp button.on{background:var(--ink);color:var(--yellow)}
+.ai-box{border:var(--border);border-radius:var(--radius);background:var(--surface2);
+  box-shadow:var(--shadow-hard-sm);padding:14px 16px;margin:16px 0}
+.ai-box .row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.ai-quota{font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+.ai-quota b{color:var(--mint)}
+.ai-result{margin-top:12px;border:2px dashed #33578A;border-radius:10px;padding:12px;
+  font-size:14px;color:var(--fg);background:rgba(0,0,0,.15)}
+.ai-actions{display:flex;gap:8px;margin-top:10px}
+.btn-sm{padding:7px 14px;font-size:13px;border-radius:10px}
+
+/* ============ USER SITE (LIGHT) ============ */
+.site{background:#EFF6FF;color:#08101E;font-family:var(--font-body)}
+.site .snav{display:flex;justify-content:space-between;align-items:center;padding:18px 32px;
+  border-bottom:2px solid #08101E;background:#7DD3FC;flex-wrap:wrap;gap:10px}
+.site .snav .b{font-family:var(--font-head);font-weight:700;font-size:20px}
+.site .snav .links a{margin-left:18px;font-weight:600;font-size:14px;color:#08101E}
+.site .shero{padding:56px 32px;text-align:center}
+.site .shero h1{font-family:var(--font-head);font-size:44px;color:#08101E}
+.site .shero h1 span{background:#34D399;padding:0 12px;border:2px solid #08101E;
+  border-radius:10px;display:inline-block;box-shadow:4px 4px 0 #08101E;transform:rotate(-1.5deg)}
+.site .shero p{color:#3B506E;max-width:520px;margin:14px auto 24px}
+.site .sec{padding:40px 32px;border-top:2px dashed #A9C6F366}
+.site .sec h2{font-family:var(--font-head);font-size:26px;color:#08101E;margin-bottom:18px}
+.site .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px}
+.site .ucard{background:#fff;border:2px solid #08101E;border-radius:14px;
+  box-shadow:4px 4px 0 #08101E;padding:20px}
+.site .ucard .ic{font-size:28px;margin-bottom:8px}
+.site .ucard h3{font-family:var(--font-head);font-size:17px;color:#08101E}
+.site .ucard p{font-size:14px;color:#3B506E;margin-top:4px}
+.site .scta{padding:48px 32px;text-align:center}
+.site .scta .big{background:#FB7185;color:#EFF6FF;border:2px solid #08101E;
+  box-shadow:4px 4px 0 #08101E;border-radius:14px;padding:14px 32px;
+  font-family:var(--font-head);font-weight:700;font-size:17px;display:inline-block;cursor:pointer}
+.site .sfoot{border-top:2px solid #08101E;padding:14px 32px;display:flex;
+  justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;background:#D6E9FF}
+.site .sfoot .made{font-size:12px;color:#3B506E}
+.site .sfoot .made b{color:#08101E}
+.report-btn{border:2px solid #08101E;background:#fff;border-radius:8px;padding:4px 10px;
+  font-size:11px;font-weight:600;cursor:pointer;box-shadow:2px 2px 0 #08101E}
+
+@media(max-width:860px){
+  .hero,.ed-grid{grid-template-columns:1fr}
+  .stats,.step-grid{grid-template-columns:1fr 1fr}
+  .hero h1{font-size:38px}
+  .plan-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- TAB BAR -->
+<div class="tabs"><div class="tabbar">
+  <button class="tab active" data-v="v-landing">🏠 Landing Page</button>
+  <button class="tab" data-v="v-editor">🛠 Editor + Preview</button>
+  <button class="tab" data-v="v-site">🌐 Site Hasil User (Terang)</button>
+</div></div>
+
+<!-- ================= VIEW 1: LANDING ================= -->
+<div class="view show" id="v-landing"><div class="wrap">
+  <nav class="nav">
+    <div class="logo"><span class="mark">W</span> WeBuild</div>
+    <div style="display:flex;gap:10px">
+      <a class="btn btn-ghost" href="#" style="text-decoration:none">Masuk</a>
+      <a class="btn btn-primary" href="#" style="text-decoration:none">Daftar Gratis</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div>
+      <span class="badge badge-yellow">BLOCK-BASED BUILDER</span>
+      <h1>Bikin website<br>dalam <span class="hl">menit</span>,<br>tanpa ngoding.</h1>
+      <p>Susun website kamu dari blok-blok siap pakai. Ada asisten AI yang bantu menulis konten. Publish sekali klik — gratis.</p>
+      <div class="ctas">
+        <a class="btn btn-mint" href="#">⚡ Buat Website Sekarang</a>
+        <a class="btn btn-ghost" href="#">Lihat Contoh</a>
+      </div>
+    </div>
+    <div>
+      <div class="card card-sm" style="margin-bottom:18px">
+        <div class="mono" style="font-size:13px;color:var(--muted)">STATUS PLATFORM</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+          <span class="badge badge-mint" style="box-shadow:2px 2px 0 var(--shadow)">ONLINE</span>
+          <span class="mono" style="font-size:12px;color:var(--muted)">1.204 site ter-publish</span>
+        </div>
+      </div>
+      <div class="terminal">
+        <div class="bar">
+          <span class="dot" style="background:var(--coral)"></span>
+          <span class="dot" style="background:var(--yellow)"></span>
+          <span class="dot" style="background:var(--mint)"></span>
+        </div>
+        <div class="body">
+<div><span class="prompt">➜ webuild</span> publish --site kopi-kenangan</div>
+<div class="dim">01:00 VALID  mengecek blok & alt text…</div>
+<div class="dim">02:00 RENDER  6 blok → HTML statis</div>
+<div class="dim">03:00 CACHE   revalidateTag(site-882)</div>
+<div class="ok">✔ LIVE  → webuild.vercel.app/s/kopi-kenangan</div>
+<div><span class="prompt">➜ webuild</span> <span class="dim">selesai dalam 1.2s</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats">
+    <div class="stat"><div class="num">1.204</div><div class="lbl">Site ter-publish</div></div>
+    <div class="stat"><div class="num">89%</div><div class="lbl">Publish rate</div></div>
+    <div class="stat"><div class="num">0 Rp</div><div class="lbl">Biaya selamanya</div></div>
+  </div>
+
+  <div class="dashed"></div>
+
+  <h2 style="font-size:32px;margin-bottom:8px">Mulai tanpa ribet</h2>
+  <p style="color:var(--muted);margin-bottom:24px">Dari daftar sampai website online dalam empat langkah.</p>
+  <div class="step-grid">
+    <div class="card card-sm step"><span class="n">01</span><h3>Buat akun</h3><p>Email dan password. Selesai.</p></div>
+    <div class="card card-sm step"><span class="n">02</span><h3>Pilih template</h3><p>Site langsung terisi contoh siap edit.</p></div>
+    <div class="card card-sm step"><span class="n">03</span><h3>Edit blok</h3><p>Form sederhana, AI bantu nulis.</p></div>
+    <div class="card card-sm step"><span class="n">04</span><h3>Publish!</h3><p>URL langsung bisa dibagikan.</p></div>
+  </div>
+
+  <div class="dashed"></div>
+
+  <h2 style="font-size:32px;text-align:center;margin-bottom:24px">Pilih plan kamu</h2>
+  <div class="plan-grid">
+    <div class="card plan-card">
+      <span class="badge badge-yellow" style="box-shadow:2px 2px 0 var(--shadow)">FREE</span>
+      <div class="plan-price">Rp 0<span style="font-size:16px;color:var(--muted)"> /selamanya</span></div>
+      <ul>
+        <li><span class="ok">✔</span> 1 website aktif</li>
+        <li><span class="ok">✔</span> 10 AI generate / hari</li>
+        <li><span class="ok">✔</span> Upload 50 MB</li>
+        <li><span class="x">✘</span> Badge "Dibuat dengan WeBuild"</li>
+      </ul>
+      <a class="btn btn-ghost" href="#">Mulai Gratis</a>
+    </div>
+    <div class="card plan-card pop">
+      <span class="badge badge-mint" style="box-shadow:2px 2px 0 var(--shadow)">PLUS</span>
+      <div class="plan-price">Rp 25rb<span style="font-size:16px;color:var(--muted)"> /bulan</span></div>
+      <ul>
+        <li><span class="ok">✔</span> 10 website aktif</li>
+        <li><span class="ok">✔</span> 50 AI generate / hari</li>
+        <li><span class="ok">✔</span> Upload 500 MB</li>
+        <li><span class="ok">✔</span> Hapus badge + deploy ke Vercel sendiri</li>
+      </ul>
+      <a class="btn btn-mint" href="#">Upgrade ke Plus</a>
+    </div>
+  </div>
+</div></div>
+
+<!-- ================= VIEW 2: EDITOR ================= -->
+<div class="view" id="v-editor"><div class="wrap">
+  <div class="ed-topbar">
+    <div class="logo"><span class="mark" style="width:28px;height:28px;font-size:14px">W</span></div>
+    <div class="crumb">editor / <b>kopi-kenangan</b> · <span style="color:var(--mint)">● tersimpan</span></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost btn-sm">↶ Undo</button>
+      <button class="btn btn-mint btn-sm">🚀 Publish</button>
+    </div>
+  </div>
+
+  <div class="ed-grid">
+    <!-- KIRI: BLOCK FORMS -->
+    <div>
+      <div class="ai-box">
+        <div class="row">
+          <strong style="font-size:15px">✨ Asisten AI</strong>
+          <span class="ai-quota">sisa <b>7/10</b> hari ini</span>
+        </div>
+        <div class="field" style="margin-top:10px">
+          <label>Tulis instruksi untuk AI</label>
+          <input placeholder="contoh: buat teks promosi kopi susu gula aren">
+        </div>
+        <div class="ai-actions">
+          <button class="btn btn-primary btn-sm" style="width:100%">Generate Konten</button>
+        </div>
+        <div class="ai-result">
+          ☕ <strong>Kopi Susu Gula Aren</strong><br>
+          Nikmatnya kopi robusta pilihan dipadukan gula aren asli…
+          <div class="ai-actions">
+            <button class="btn btn-mint btn-sm">✔ Pakai</button>
+            <button class="btn btn-ghost btn-sm">↻ Ulangi</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>Blok Halaman</h3><span class="mono" style="font-size:12px;color:var(--muted)">4 blok</span></div>
+
+        <div class="block-item">
+          <div class="bh"><span class="bt">Hero</span>
+            <div class="tools"><button class="mini-btn">↑</button><button class="mini-btn">↓</button><button class="mini-btn del">✕</button></div>
+          </div>
+          <div class="field"><label>Judul</label><input value="Kopi Kenangan Senja"></div>
+          <div class="field"><label>Sub-judul</label><input value="Kopi susu gula aren, hangatnya sore ini."></div>
+        </div>
+
+        <div class="block-item">
+          <div class="bh"><span class="bt">Teks</span>
+            <div class="tools"><button class="mini-btn">↑</button><button class="mini-btn">↓</button><button class="mini-btn del">✕</button></div>
+          </div>
+          <div class="field"><label>Isi</label><textarea>Setiap cangkir dibuat dari biji pilihan petani lokal…</textarea></div>
+        </div>
+
+        <div class="block-item">
+          <div class="bh"><span class="bt">Gambar</span>
+            <div class="tools"><button class="mini-btn">↑</button><button class="mini-btn">↓</button><button class="mini-btn del">✕</button></div>
+          </div>
+          <div class="field"><label>Alt text (wajib)</label><input value="Barista menuang susu ke kopi"></div>
+          <div class="field"><label>Gambar</label>
+            <button class="btn btn-ghost btn-sm" style="width:100%">📷 Upload / Kamera (maks 2 MB)</button>
+          </div>
+        </div>
+
+        <div class="block-item">
+          <div class="bh"><span class="bt">Tombol WhatsApp</span>
+            <div class="tools"><button class="mini-btn">↑</button><button class="mini-btn">↓</button><button class="mini-btn del">✕</button></div>
+          </div>
+          <div class="field"><label>No. WA</label><input value="0812-3456-7890"></div>
+        </div>
+
+        <div class="addblock">
+          <button>+ Hero</button><button>+ Teks</button><button>+ Gambar</button>
+          <button>+ Tombol</button><button>+ Galeri</button><button>+ Kontak</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- KANAN: PREVIEW -->
+    <div class="preview-frame">
+      <div class="pbar">
+        <div class="vp"><button>🖥</button><button class="on">📱</button></div>
+        <div class="url">webuild.vercel.app/preview/kopi-kenangan</div>
+      </div>
+      <div style="max-width:390px;margin:0 auto;background:#EFF6FF">
+        <div class="site">
+          <nav class="snav"><span class="b">☕ Kopi Kenangan</span><span class="links"><a href="#">Menu</a><a href="#">Kontak</a></span></nav>
+          <section class="shero">
+            <h1>Hangatnya <span>Sore Ini</span></h1>
+            <p>Kopi susu gula aren, dibuat dari biji pilihan petani lokal. Pesan sekarang, sampai masih hangat.</p>
+            <span class="big" style="background:#34D399;color:#08101E">🛒 Pesan via WhatsApp</span>
+          </section>
+          <section class="sec">
+            <h2>Favorit Pelanggan</h2>
+            <div class="cards">
+              <div class="ucard"><div class="ic">☕</div><h3>Kopi Susu Aren</h3><p>Rp 18.000</p></div>
+              <div class="ucard"><div class="ic">🥛</div><h3>Matcha Latte</h3><p>Rp 22.000</p></div>
+              <div class="ucard"><div class="ic">🥐</div><h3>Croissant</h3><p>Rp 15.000</p></div>
+            </div>
+          </section>
+          <footer class="sfoot">
+            <span class="made">Dibuat dengan <b>WeBuild</b></span>
+            <button class="report-btn">⚠ Laporkan</button>
+          </footer>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<!-- ================= VIEW 3: USER SITE ================= -->
+<div class="view" id="v-site"><div class="wrap" style="max-width:900px">
+  <p style="color:var(--muted);margin-bottom:16px;font-size:14px">
+    <span class="badge badge-mint" style="box-shadow:2px 2px 0 var(--shadow)">MODE TERANG</span>
+    &nbsp;Beginilah tampilan website hasil user — neobrutalism versi cerah, ramah untuk pengunjung UMKM.</p>
+
+  <div style="border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow-hard);overflow:hidden">
+  <div class="site">
+    <nav class="snav">
+      <span class="b">☕ Kopi Kenangan Senja</span>
+      <span class="links"><a href="#">Beranda</a><a href="#">Menu</a><a href="#">Lokasi</a></span>
+    </nav>
+    <section class="shero">
+      <h1>Hangatnya <span>Sore Ini</span><br>di Cangkir Kamu</h1>
+      <p>Kopi susu gula aren asli, dibuat dari biji robusta pilihan petani lokal Indonesia. Pesan sekarang — sampai rumah masih hangat.</p>
+      <span class="big">🛒 Pesan via WhatsApp</span>
+    </section>
+    <section class="sec">
+      <h2>Menu Favorit</h2>
+      <div class="cards">
+        <div class="ucard"><div class="ic">☕</div><h3>Kopi Susu Aren</h3><p>Kopi robusta + gula aren asli. Rp 18.000</p></div>
+        <div class="ucard"><div class="ic">🥛</div><h3>Matcha Latte</h3><p>Matcha premium susu segar. Rp 22.000</p></div>
+        <div class="ucard"><div class="ic">🍫</div><h3>Choco Dust</h3><p>Cokelat pekat lembut. Rp 20.000</p></div>
+      </div>
+    </section>
+    <section class="sec">
+      <h2>Kata Mereka</h2>
+      <div class="cards">
+        <div class="ucard"><p style="font-size:14px">"Terbaik! Setiap sore wajib pesan."</p><p style="font-size:12px;color:#3B506E;margin-top:8px">— Dinda, pelanggan setia</p></div>
+        <div class="ucard"><p style="font-size:14px">"Gula arennya asli, beda dari yang lain."</p><p style="font-size:12px;color:#3B506E;margin-top:8px">— Pak Budi</p></div>
+      </div>
+    </section>
+    <section class="scta">
+      <h2 style="margin-bottom:12px">Lapar tapi males keluar?</h2>
+      <span class="big">🛒 Pesan Sekarang — Gratis Ongkir</span>
+    </section>
+    <footer class="sfoot">
+      <span class="made">Dibuat dengan <b>WeBuild</b> · bikin website gratis di webuild.vercel.app</span>
+      <button class="report-btn">⚠ Laporkan situs ini</button>
+    </footer>
+  </div>
+  </div>
+</div></div>
+
+<script>
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('show'));
+    t.classList.add('active');
+    document.getElementById(t.dataset.v).classList.add('show');
+    window.scrollTo({top:0, behavior:'instant'});
+  });
+});
+</script>
+</body>
+</html>
