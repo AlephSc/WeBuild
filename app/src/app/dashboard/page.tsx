@@ -1,12 +1,21 @@
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
 import { SiteCard } from "@/components/dashboard/site-card";
 import { NewSiteForm } from "@/components/dashboard/new-site-form";
 import { redirect } from "next/navigation";
 
-// F3: data asli dari Prisma (bukan mock). Cookies() membuat route otomatis dinamis.
+// F3: data asli dari Prisma (bukan mock). cookies() wajib dalam <Suspense> (Next 16 Cache Components).
 
-export default async function DashboardPage() {
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 24 }}>Memuat dashboard…</div>}>
+      <DashboardInner />
+    </Suspense>
+  );
+}
+
+async function DashboardInner() {
   const session = await getAuthUser();
   if (!session) redirect("/login");
 
