@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Logo } from "@/components/nav";
 import { SEED_TEMPLATE } from "@/lib/block-templates";
 import { useEditorStore } from "@/lib/editor-store";
@@ -20,6 +21,9 @@ export default function EditorShell({ siteId }: { siteId: string }) {
   const [hydrated, setHydrated] = useState(false);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [publishing, setPublishing] = useState(false);
+  const [publishMsg, setPublishMsg] = useState<string | null>(null);
+  const router = useRouter();
   const isNew = siteId === "new";
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedRef = useRef<string>("");
@@ -77,6 +81,36 @@ export default function EditorShell({ siteId }: { siteId: string }) {
     idle: "—", dirty: "● ada perubahan", saving: "⏳ menyimpan…", saved: "● tersimpan", error: "✖ gagal simpan",
   }[saveState];
 
+  // F6: Publish — validasi server, lalu tawarkan buka site live
+  async function publish() {
+    if (isNew) {
+      setPublishMsg("Simpan dulu website-mu sebelum publish (klik Buat di dashboard).");
+      return;
+    }
+    setPublishing(true);
+    setPublishMsg(null);
+    try {
+      // pastikan draft terbaru tersimpan dulu
+      await fetch(`/api/sites/${siteId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ blocks }),
+      });
+      const res = await fetch(`/api/sites/${siteId}/publish`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        setPublishMsg(data.error ?? "Publish gagal.");
+        return;
+      }
+      setPublishMsg(`✔ Terpublish! Versi ${data.version}`);
+      router.push(`/s/${data.url?.split("/").pop()}`);
+    } catch {
+      setPublishMsg("Koneksi bermasalah saat publish.");
+    } finally {
+      setPublishing(false);
+    }
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       {/* Topbar */}
@@ -100,15 +134,20 @@ export default function EditorShell({ siteId }: { siteId: string }) {
           <button className="nb-btn nb-btn-ghost" onClick={redo} disabled={futureLen === 0}>
             ↷ Redo
           </button>
-          {/* F6: Publish flow — disabled di v1 */}
-          <button className="nb-btn nb-btn-mint" disabled title="F6">
-            Publish
+          {/* F6: Publish aktif */}
+          <button className="nb-btn nb-btn-mint" onClick={publish} disabled={publishing || !hydrated}>
+            {publishing ? "🚀 Mempublish…" : "🚀 Publish"}
           </button>
         </div>
       </header>
       {loadError && (
         <p role="alert" className="px-4 pt-2 text-sm" style={{ color: "var(--accent-danger)" }}>
           {loadError}
+        </p>
+      )}
+      {publishMsg && (
+        <p role="status" className="px-4 pt-2 text-sm" style={{ color: "var(--accent-success)" }}>
+          {publishMsg}
         </p>
       )}
       {/* Grid 2 kolom: kiri blok, kanan preview */}
