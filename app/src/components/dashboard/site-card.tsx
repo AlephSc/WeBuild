@@ -1,9 +1,15 @@
 import Link from "next/link";
-import type { MockSite } from "@/lib/mock-sites";
 
-// Kartu satu site di grid dashboard
-// TODO F3: terima data site dari server component (Prisma), bukan mock
-export function SiteCard({ site }: { site: MockSite }) {
+// Kartu satu site di grid dashboard (F3: data asli dari Prisma)
+export interface SiteCardData {
+  id: string;
+  title: string;
+  slug: string;
+  status: "PUBLISHED" | "DRAFT";
+  updatedAt: string;
+}
+
+export function SiteCard({ site }: { site: SiteCardData }) {
   return (
     <article className="nb-card flex flex-col gap-3">
       {/* Thumbnail placeholder — TODO F4: ganti dengan screenshot/render asli site */}

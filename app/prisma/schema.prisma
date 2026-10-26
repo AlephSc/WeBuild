@@ -40,6 +40,91 @@ model User {
   tosAcceptedAt  DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  sites          Site[]
+  assets         Asset[]
+  aiPermissions  AiPermission[]
+  aiUsageLogs    AiUsageLog[]
 
   @@index([email])
+}
+
+// ===== F3: Site & Blok =====
+model Site {
+  id                String    @id @default(uuid()) @db.Uuid
+  ownerId           String    @db.Uuid
+  owner             User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  title             String
+  slug              String    @unique // partial unique utk published dijalankan via raw SQL migration
+  draftSnapshot     Json      // Block[] draft — sedang diedit
+  publishedSnapshot Json?     // Block[] live di /s/slug (D5: terpisah dari draft)
+  template          String    @default("default") // id template CSS variables
+  version           Int       @default(0) // naik tiap publish
+  publishedAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  revisions         SiteRevision[]
+  events            SiteEvent[]
+
+  @@index([ownerId])
+}
+
+model SiteRevision {
+  id        String   @id @default(uuid()) @db.Uuid
+  siteId    String   @db.Uuid
+  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  version   Int
+  snapshot  Json
+  createdAt DateTime @default(now())
+
+  @@unique([siteId, version])
+}
+
+// ===== F5 (siapkan sejak F3 supaya migrasi sekali) =====
+model Asset {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @db.Uuid
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  r2Key       String
+  url         String
+  contentType String
+  sizeBytes   Int
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ===== F10 (analytics self-hosted) =====
+model SiteEvent {
+  id        String   @id @default(uuid()) @db.Uuid
+  siteId    String?  @db.Uuid
+  site      Site?    @relation(fields: [siteId], references: [id], onDelete: SetNull)
+  userId    String?  @db.Uuid
+  eventType String
+  createdAt DateTime @default(now())
+
+  @@index([eventType, createdAt])
+}
+
+// ===== F8 (AI gateway) =====
+model AiPermission {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @unique @db.Uuid
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  canUseAi   Boolean  @default(true)
+  quotaUsed  Int      @default(0)
+  quotaDate  DateTime @default(now()) // reset harian: WHERE quota_date = today
+  updatedAt  DateTime @updatedAt
+}
+
+model AiUsageLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @db.Uuid
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider   String
+  tokensIn   Int      @default(0)
+  tokensOut  Int      @default(0)
+  status     String
+  createdAt  DateTime @default(now())
+
+  @@index([userId, createdAt])
 }

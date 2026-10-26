@@ -1,24 +1,42 @@
-import { mockSites } from "@/lib/mock-sites";
+import { prisma } from "@/lib/prisma";
+import { getAuthUser } from "@/lib/auth";
 import { SiteCard } from "@/components/dashboard/site-card";
+import { NewSiteForm } from "@/components/dashboard/new-site-form";
+import { redirect } from "next/navigation";
 
-export default function DashboardPage() {
-  const sites = mockSites; // TODO F3: ganti mock dengan prisma site.findMany(userId)
+// F3: data asli dari Prisma (bukan mock). Cookies() membuat route otomatis dinamis.
+
+export default async function DashboardPage() {
+  const session = await getAuthUser();
+  if (!session) redirect("/login");
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.uid },
+    include: { plan: true, sites: { orderBy: { updatedAt: "desc" } } },
+  });
+  if (!user) redirect("/login");
+
+  const sites = user.sites.map((s) => ({
+    id: s.id,
+    title: s.title,
+    slug: s.slug,
+    status: s.publishedAt ? ("PUBLISHED" as const) : ("DRAFT" as const),
+    updatedAt: s.updatedAt.toISOString(),
+  }));
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8">
-      {/* Greeting + plan */}
       <header className="flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-bold sm:text-3xl" style={{ fontFamily: "var(--font-heading)" }}>
-          Halo, Budi
+          Halo, {user.name}
         </h1>
-        <span className="nb-badge nb-badge-yellow">FREE</span>
-        {/* TODO: badge plan dinamis dari session (FREE/PRO) */}
+        <span className="nb-badge nb-badge-yellow">{user.plan?.name ?? "FREE"}</span>
       </header>
 
       {/* Kartu AI-first utama */}
       <section
-        className="nb-card flex flex-col gap-4 border-accent"
-        style={{ borderWidth: "3px", background: "var(--surface2)" }}
+        className="nb-card flex flex-col gap-4"
+        style={{ borderWidth: "3px", borderColor: "var(--accent)", background: "var(--surface2)" }}
       >
         <h2 className="text-xl font-bold sm:text-2xl" style={{ fontFamily: "var(--font-heading)" }}>
           Bangun website baru dengan AI
@@ -41,11 +59,9 @@ export default function DashboardPage() {
             Generate Website
           </button>
         </div>
+        {/* Aksesibilitas: jalur manual untuk yang tidak ingin pakai AI */}
         <p className="text-xs">
-          {/* Aksesibilitas: jalur manual untuk yang tidak ingin pakai AI */}
-          <a href="/editor/new" className="underline" style={{ color: "var(--muted)" }}>
-            Buat manual tanpa AI
-          </a>
+          <NewSiteForm />
         </p>
       </section>
 
@@ -55,7 +71,7 @@ export default function DashboardPage() {
           Website Saya
         </h2>
         {sites.length === 0 ? (
-          <div className="nb-card nb-dashed m-0 flex flex-col items-center gap-3 border-2 border-dashed border-muted p-8 text-center" style={{ borderStyle: "dashed" }}>
+          <div className="nb-card m-0 flex flex-col items-center gap-3 p-8 text-center">
             <p className="font-semibold">Belum ada website</p>
             <p className="text-sm" style={{ color: "var(--muted)" }}>
               Mulai dari prompt AI di atas, atau buat manual tanpa AI.
