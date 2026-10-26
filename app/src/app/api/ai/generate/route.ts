@@ -5,17 +5,16 @@ import { getAuthUser } from "@/lib/auth";
 import { log } from "@/lib/log";
 import { generateBlocksWithAI } from "@/lib/ai-gateway";
 import { validateBlocks } from "@/lib/site-utils";
+import { getEffectiveProviders, getAiQuota } from "@/lib/ai-config";
 
 // F8: POST /api/ai/generate
-// Pipeline: verify → kuota atomik (SQL UPDATE ... WHERE) → generate → validasi → log
+// Pipeline: verify → kuota atomik (SQL UPDATE ... WHERE) → generate (config runtime F10) → validasi → log
 // Race-proof: 2 request paralel saat sisa 1 → tepat SATU lolos (PRD F8).
 
 const BodySchema = z.object({
   instruction: z.string().min(5).max(1000),
   siteId: z.string().uuid().optional(),
 });
-
-const PLAN_AI_PER_DAY: Record<string, number> = { FREE: 10, PLUS: 50 };
 
 // Satu UPDATE atomic: hari sama → +1 hanya jika < limit; hari beda → reset ke 1.
 // Postgres meng-serialisasi UPDATE baris sama → race paralel aman.
@@ -48,7 +47,8 @@ export async function POST(req: NextRequest) {
   if (aiPerm && !aiPerm.canUseAi)
     return NextResponse.json({ ok: false, error: "Akses AI kamu dinonaktifkan admin." }, { status: 403 });
 
-  const limit = PLAN_AI_PER_DAY[user.plan?.name ?? "FREE"] ?? 10;
+  const planName = user.plan?.name ?? "FREE";
+  const limit = await getAiQuota(planName);
   const today = new Date(); today.setHours(0, 0, 0, 0);
 
   // ===== KUOTA ATOMIK =====
@@ -72,8 +72,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // ===== GENERATE =====
-  const result = await generateBlocksWithAI(parsed.data.instruction);
+  // ===== GENERATE (F10: providers dari config runtime) =====
+  const providers = await getEffectiveProviders();
+  const result = await generateBlocksWithAI(parsed.data.instruction, providers);
 
   // log pemakaian (telemetri — PRD F8 & bahan laporan F10)
   await prisma.aiUsageLog.create({

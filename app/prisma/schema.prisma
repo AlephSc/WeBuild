@@ -128,3 +128,20 @@ model AiUsageLog {
 
   @@index([userId, createdAt])
 }
+
+// ===== F10: konfigurasi AI router (runtime, admin-editable) =====
+// D10 sebelumnya konstanta kode; sekarang admin bisa toggle tanpa redeploy.
+model AiProviderConfig {
+  id        String  @id @default(uuid()) @db.Uuid
+  provider  String  @unique // 'gemini' | 'groq'
+  isEnabled Boolean @default(true)
+  model     String  // mis. gemini-2.5-flash / llama-3.1-8b-instant
+  updatedAt DateTime @updatedAt
+}
+
+// Global settings key-value (kuota per plan, dsb) — fleksibel tanpa migrasi baru
+model AppSetting {
+  key       String   @id // 'ai_quota_FREE', 'ai_quota_PLUS', dst.
+  value     String
+  updatedAt DateTime @updatedAt
+}

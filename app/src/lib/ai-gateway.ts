@@ -1,8 +1,10 @@
 // F8: AI Gateway — prompt → structured output (JSON blocks) → validasi zod.
 // Non-streaming (D6): output pendek. Kuota atomik di route.ts (UPDATE ... WHERE).
-import { AI_PROVIDERS, AI_TOKEN_BUDGET, type ProviderId } from "./ai-providers";
+// F10: model & enabled dari config runtime DB (getEffectiveProviders).
+import { AI_PROVIDERS, type ProviderId } from "./ai-providers";
 import { validateBlock, type Block } from "./blocks";
 import { log } from "./log";
+import type { EffectiveProvider } from "./ai-config";
 
 const SYSTEM_PROMPT = `Kamu adalah asisten pembuat konten website untuk UMKM/siswa Indonesia.
 Tugas: ubah instruksi user menjadi array BLOK website dalam JSON.
@@ -26,19 +28,27 @@ export type GenerateResult =
   | { ok: true; blocks: Block[]; provider: ProviderId; tokens: { in: number; out: number } }
   | { ok: false; error: string; code: "AI_UNAVAILABLE" | "AI_INVALID_OUTPUT" };
 
-export async function generateBlocksWithAI(instruction: string): Promise<GenerateResult> {
+export async function generateBlocksWithAI(instruction: string, providers?: EffectiveProvider[]): Promise<GenerateResult> {
   const errors: string[] = [];
+  // F10: provider list dari config runtime (order = fallback order); fallback default kalau DB gagal
+  const effective = providers ?? (Object.keys(AI_PROVIDERS) as ProviderId[]).map((id) => ({
+    id, isEnabled: true, model: AI_PROVIDERS[id].model,
+  }));
 
-  for (const providerId of ["gemini", "groq"] as ProviderId[]) {
-    const provider = AI_PROVIDERS[providerId];
+  for (const eff of effective) {
+    if (!eff.isEnabled) {
+      errors.push(`${eff.id}: disabled by admin`);
+      continue;
+    }
+    const provider = AI_PROVIDERS[eff.id];
     const apiKey = process.env[provider.envKey];
     if (!apiKey) {
-      errors.push(`${providerId}: no key`);
+      errors.push(`${eff.id}: no key`);
       continue;
     }
 
     try {
-      const raw = await callProvider(providerId, instruction, apiKey);
+      const raw = await callProvider(eff.id, instruction, apiKey, eff.model);
       const blocks = extractBlocks(raw);
       // Validasi tiap blok dengan schema registry (F8 spec)
       const valid: Block[] = [];
@@ -49,19 +59,19 @@ export async function generateBlocksWithAI(instruction: string): Promise<Generat
       return {
         ok: true,
         blocks: valid,
-        provider: providerId,
+        provider: eff.id,
         tokens: { in: Math.ceil((SYSTEM_PROMPT.length + instruction.length) / 4), out: Math.ceil(raw.length / 4) },
       };
     } catch (e) {
-      log("warn", "ai provider gagal, coba fallback", { provider: providerId, err: String(e).slice(0, 120) });
-      errors.push(`${providerId}: ${String(e).slice(0, 80)}`);
+      log("warn", "ai provider gagal, coba fallback", { provider: eff.id, err: String(e).slice(0, 120) });
+      errors.push(`${eff.id}: ${String(e).slice(0, 80)}`);
     }
   }
 
   return { ok: false, error: "Layanan AI sedang tidak tersedia. Coba lagi sebentar.", code: "AI_UNAVAILABLE" };
 }
 
-async function callProvider(providerId: ProviderId, instruction: string, apiKey: string): Promise<string> {
+async function callProvider(providerId: ProviderId, instruction: string, apiKey: string, model: string): Promise<string> {
   const provider = AI_PROVIDERS[providerId];
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 30000); // 30s budget
@@ -69,14 +79,14 @@ async function callProvider(providerId: ProviderId, instruction: string, apiKey:
   try {
     if (providerId === "gemini") {
       const res = await fetch(
-        `${provider.baseUrl}/models/${provider.model}:generateContent?key=${apiKey}`,
+        `${provider.baseUrl}/models/${model}:generateContent?key=${apiKey}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           signal: controller.signal,
           body: JSON.stringify({
             systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-            contents: [{ role: "user", parts: [{ text: instruction.slice(0, AI_TOKEN_BUDGET.input * 4) }] }],
+            contents: [{ role: "user", parts: [{ text: instruction.slice(0, 16000) }] }],
             generationConfig: {
               maxOutputTokens: 4096, // thinking model memakan budget — 800 terlalu kecil, JSON terpotong
               temperature: 0.7,
@@ -96,12 +106,12 @@ async function callProvider(providerId: ProviderId, instruction: string, apiKey:
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       signal: controller.signal,
       body: JSON.stringify({
-        model: provider.model,
+        model, // F10: model dari config runtime
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: instruction.slice(0, AI_TOKEN_BUDGET.input * 4) },
+          { role: "user", content: instruction.slice(0, 16000) },
         ],
-        max_tokens: AI_TOKEN_BUDGET.output,
+        max_tokens: 4096,
         response_format: { type: "json_object" },
       }),
     });

@@ -77,11 +77,41 @@ export default async function PublishedSitePage({ params }: Props) {
         <span>
           Dibuat dengan <strong>WeBuild</strong> · bikin website gratis di webuild.vercel.app
         </span>
-        <a href="/tos" style={{ color: "#3a5560" }}>
-          ⚠ Laporkan
-        </a>
+        <ReportButton slug={slug} />
       </footer>
     </div>
+  );
+}
+
+// F9: tombol Laporkan — client component kecil (fetch POST)
+function ReportButton({ slug }: { slug: string }) {
+  return (
+    <button
+      type="button"
+      style={{
+        border: "2px solid #061421", background: "#fff", borderRadius: 8,
+        padding: "4px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer",
+        boxShadow: "2px 2px 0 #061421",
+      }}
+      onClick={async (e) => {
+        const btn = e.currentTarget;
+        btn.disabled = true;
+        btn.textContent = "Mengirim…";
+        try {
+          const res = await fetch("/api/report", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ slug }),
+          });
+          const data = await res.json();
+          btn.textContent = data.ok ? "✔ Terkirim" : (data.error ?? "Gagal");
+        } catch {
+          btn.textContent = "Gagal kirim";
+        }
+      }}
+    >
+      ⚠ Laporkan
+    </button>
   );
 }
 
