@@ -9,11 +9,12 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@prisma/client": "^7.10.1",
+    "@prisma/client": "^6.19.3",
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.3",
     "isomorphic-dompurify": "^4.6.0",
     "next": "16.4.3",
+    "prisma": "^6.19.3",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "zod": "^4.6.7",
