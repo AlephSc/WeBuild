@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
 import { SiteCard } from "@/components/dashboard/site-card";
 import { NewSiteForm } from "@/components/dashboard/new-site-form";
+import { AiGenerateForm } from "@/components/dashboard/ai-generate-form";
 import { redirect } from "next/navigation";
 
 // F3: data asli dari Prisma (bukan mock). cookies() wajib dalam <Suspense> (Next 16 Cache Components).
@@ -50,24 +51,7 @@ async function DashboardInner() {
         <h2 className="text-xl font-bold sm:text-2xl" style={{ fontFamily: "var(--font-heading)" }}>
           Bangun website baru dengan AI
         </h2>
-        <div className="nb-field">
-          <label htmlFor="ai-prompt">Prompt website</label>
-          <textarea
-            id="ai-prompt"
-            rows={4}
-            className="resize-y"
-            placeholder="Ceritakan website yang kamu inginkan… contoh: website UMKM keripik pedas, ada katalog produk, harga, dan tombol order WhatsApp"
-          />
-        </div>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="max-w-md text-xs" style={{ color: "var(--muted)" }}>
-            AI akan menyusun blok otomatis; kamu tinggal review &amp; edit.
-          </p>
-          {/* TODO F8: aktifkan setelah AI gateway siap */}
-          <button type="button" className="nb-btn nb-btn-mint" disabled title="Aktif setelah AI gateway — F8">
-            Generate Website
-          </button>
-        </div>
+        <AiGenerateForm canCreate={sites.length === 0 || (user.plan?.name ?? "FREE") !== "FREE"} />
         {/* Aksesibilitas: jalur manual untuk yang tidak ingin pakai AI */}
         <p className="text-xs">
           <NewSiteForm />

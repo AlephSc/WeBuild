@@ -5,7 +5,7 @@ export const AI_PROVIDERS = {
     label: "Google Gemini",
     envKey: "GEMINI_API_KEY",
     baseUrl: "https://generativelanguage.googleapis.com/v1beta",
-    model: "gemini-2.0-flash",
+    model: "gemini-2.5-flash", // 2.0-flash pensiun; 3.8-flash sering 503 high-demand
   },
   groq: {
     id: "groq",
