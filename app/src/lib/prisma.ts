@@ -1,12 +1,10 @@
-// Placeholder DB untuk development lokal F1 (belum ada Neon).
-// Saat DATABASE_URL diset, Prisma pakai Neon; health check melaporkan status asli.
+// Prisma client singleton — DATABASE_URL dari .env (Neon) dipakai otomatis.
+// Tanpa DATABASE_URL, koneksi gagal dan /api/health melaporkan db:down.
 
 import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  datasources: process.env.DATABASE_URL ? undefined : { db: { url: "postgresql://placeholder:placeholder@localhost:5432/placeholder" } },
-});
+export const prisma = globalForPrisma.prisma ?? new PrismaClient();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
