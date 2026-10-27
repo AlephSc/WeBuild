@@ -1,6 +1,6 @@
 // Slug utils — validasi blok & slug (F3, unit-tested)
 import { validateBlock, type Block } from "./blocks";
-import { SEED_TEMPLATE } from "./block-templates";
+import { SEED_TEMPLATE, SITE_TEMPLATES, getTemplate, type SiteTemplate } from "./block-templates";
 
 export function slugify(text: string): string {
   return (
@@ -34,5 +34,5 @@ export function validateBlocks(blocks: unknown): { ok: true; blocks: Block[] } |
   return { ok: true, blocks: blocks as Block[] };
 }
 
-export { SEED_TEMPLATE, validateBlock };
+export { SEED_TEMPLATE, SITE_TEMPLATES, getTemplate, type SiteTemplate, validateBlock };
 export type { Block };

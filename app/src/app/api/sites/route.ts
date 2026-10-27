@@ -3,12 +3,13 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
 import { log } from "@/lib/log";
-import { SEED_TEMPLATE, slugify, validateBlocks } from "@/lib/site-utils";
+import { SEED_TEMPLATE, SITE_TEMPLATES, slugify, validateBlocks } from "@/lib/site-utils";
 
 // POST /api/sites — buat site baru (seed template otomatis, enforcement plan)
 const BodySchema = z.object({
   title: z.string().min(2).max(80),
-  blocks: z.array(z.record(z.string(), z.unknown())).optional(), // kosong = seed template
+  template: z.string().max(40).optional(), // id dari SITE_TEMPLATES (F11)
+  blocks: z.array(z.record(z.string(), z.unknown())).optional(), // kosong = template default
 });
 
 const PLAN_SITES: Record<string, number> = { FREE: 1, PLUS: 10 };
@@ -37,7 +38,9 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
 
-  const blocks = parsed.data.blocks?.length ? validateBlocks(parsed.data.blocks) : { ok: true as const, blocks: SEED_TEMPLATE as never[] };
+  const chosen = parsed.data.template ? SITE_TEMPLATES.find((t: { id: string }) => t.id === parsed.data.template) : undefined;
+  const seed = chosen ? chosen.blocks() : SEED_TEMPLATE;
+  const blocks = parsed.data.blocks?.length ? validateBlocks(parsed.data.blocks) : { ok: true as const, blocks: seed as never[] };
   if (!blocks.ok) return NextResponse.json({ ok: false, error: (blocks as { error: string }).error }, { status: 400 });
 
   // slug unik global (D-review DB): bentrok → auto-suffix

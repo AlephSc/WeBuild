@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
 import { SiteCard } from "@/components/dashboard/site-card";
-import { NewSiteForm } from "@/components/dashboard/new-site-form";
+import { TemplatePicker } from "@/components/dashboard/template-picker";
 import { AiGenerateForm } from "@/components/dashboard/ai-generate-form";
 import { redirect } from "next/navigation";
 
@@ -52,10 +52,14 @@ async function DashboardInner() {
           Bangun website baru dengan AI
         </h2>
         <AiGenerateForm canCreate={sites.length === 0 || (user.plan?.name ?? "FREE") !== "FREE"} />
-        {/* Aksesibilitas: jalur manual untuk yang tidak ingin pakai AI */}
-        <p className="text-xs">
-          <NewSiteForm />
-        </p>
+      </section>
+
+      {/* F11: Pilih template — grid kartu template siap pakai */}
+      <section className="nb-card flex flex-col gap-4">
+        <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-heading)" }}>
+          Atau mulai dari template
+        </h2>
+        <TemplatePicker canCreate={sites.length === 0 || (user.plan?.name ?? "FREE") !== "FREE"} />
       </section>
 
       {/* Daftar site */}

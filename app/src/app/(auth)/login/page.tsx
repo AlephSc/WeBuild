@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { PublicNav } from "@/components/nav";
-import { AuthForm } from "@/components/auth-form";
+import { GoogleAuthCard } from "@/components/google-auth-card";
 
 export const metadata: Metadata = { title: "Masuk — WeBuild" };
 
@@ -15,7 +15,7 @@ export default function LoginPage() {
             <p className="mb-5 text-sm" style={{ color: "var(--muted)" }}>
               Lanjutkan membangun situs Anda.
             </p>
-            <AuthForm mode="login" />
+            <GoogleAuthCard mode="login" />
           </div>
         </div>
       </main>
