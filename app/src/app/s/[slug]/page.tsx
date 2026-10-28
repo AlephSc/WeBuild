@@ -6,6 +6,7 @@ import { log } from "@/lib/log";
 import { validateBlocks, type Block } from "@/lib/site-utils";
 import { sanitizeSiteText } from "@/lib/sanitize";
 import BlockRenderer from "@/components/blocks/renderer";
+import { ReportButton } from "@/components/report-button";
 
 // F6: Halaman publik — hanya render publishedSnapshot (D5: draft tidak pernah bocor).
 // Di-cache via revalidateTag/publish API; unknown slug → 404.
@@ -84,39 +85,7 @@ export default async function PublishedSitePage({ params }: Props) {
   );
 }
 
-// F9: tombol Laporkan — client component kecil (fetch POST)
-function ReportButton({ slug }: { slug: string }) {
-  return (
-    <button
-      type="button"
-      style={{
-        border: "2px solid #061421", background: "#fff", borderRadius: 8,
-        padding: "4px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer",
-        boxShadow: "2px 2px 0 #061421",
-      }}
-      onClick={async (e) => {
-        const btn = e.currentTarget;
-        btn.disabled = true;
-        btn.textContent = "Mengirim…";
-        try {
-          const res = await fetch("/api/report", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ slug }),
-          });
-          const data = await res.json();
-          btn.textContent = data.ok ? "✔ Terkirim" : (data.error ?? "Gagal");
-        } catch {
-          btn.textContent = "Gagal kirim";
-        }
-      }}
-    >
-      ⚠ Laporkan
-    </button>
-  );
-}
-
-// Sanitasi per tipe blok: semua string field dikasih DOMPurify (server-side)
+// Sanitasi per tipe blok: semua string field dibersihkan sebelum render (server-side)
 function sanitizeBlockData(block: Block): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const [k, val] of Object.entries(block.data as Record<string, unknown>)) {
