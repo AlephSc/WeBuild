@@ -1,44 +1,120 @@
 import Link from "next/link";
-import { Logo } from "@/components/nav";
+import { getAuthUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { LogoutButton } from "@/components/dashboard/logout-button";
 
-const menu = [
-  { href: "/dashboard", label: "Website Saya" },
-  { href: "/dashboard/settings", label: "Pengaturan" }, // TODO: halaman F-lain
-  { href: "/dashboard/upgrade", label: "Upgrade" }, // TODO: halaman billing
+const navItems = [
+  { href: "/dashboard", label: "Website Saya", act: "home", glyph: "W" },
+  { href: "/dashboard/settings", label: "Pengaturan", act: "settings", glyph: "S" }, // TODO: halaman F-lain
+  { href: "/dashboard/upgrade", label: "Upgrade", act: "upgrade", glyph: "U" }, // TODO: halaman billing
 ];
 
-// Layout dashboard user: sidebar desktop → topbar mobile
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+// Layout dashboard user: 3 zona ala IDE
+//   Zona 1 (kiri)  : activity bar vertikal — navigasi + logout
+//   Zona 2 (tengah): tab bar ala editor + konten (children)
+//   Zona 3 (kanan) : inspektor akun & paket (desktop) / panel atas (mobile)
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const session = await getAuthUser();
+  const user = session
+    ? await prisma.user.findUnique({
+        where: { id: session.uid },
+        include: { plan: true },
+      })
+    : null;
+  const userName = user?.name ?? "Kamu";
+  const planName = user?.plan?.name ?? "FREE";
+  const siteCount = user ? await prisma.site.count({ where: { ownerId: user.id } }) : 0;
+  const planLimit = planName === "FREE" ? 1 : 10; // sinkron dgn batas AI-form: FREE 1 site, PLUS 10
+
   return (
-    <div className="flex min-h-screen flex-col lg:flex-row">
-      <aside
-        className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-ink p-4 lg:w-64 lg:flex-col lg:items-stretch lg:justify-start lg:gap-6 lg:border-b-0 lg:border-r"
-        style={{ background: "var(--surface)" }}
-      >
-        <Link href="/dashboard" aria-label="WeBuild — dashboard">
-          <Logo />
+    <div className="ide-shell">
+      {/* ===== Zona 1: activity bar ===== */}
+      <aside className="ide-activitybar" aria-label="Navigasi dashboard">
+        <Link href="/" aria-label="WeBuild — beranda" className="text-xl" style={{ fontFamily: "var(--font-heading)", color: "var(--fg)", fontWeight: 700 }}>
+          W
         </Link>
-        <nav className="flex gap-2 lg:flex-col" aria-label="Menu utama">
-          {menu.map((m) => (
-            <Link
-              key={m.href}
-              href={m.href}
-              className="nb-btn nb-btn-ghost text-sm lg:w-full"
-            >
-              {m.label}
+        <span aria-hidden className="nb-dashed" style={{ margin: 0, width: 32, borderTopWidth: 2 }} />
+        <nav className="flex flex-col gap-3" aria-label="Menu utama">
+          {navItems.map((m) => (
+            <Link key={m.href} href={m.href} className="ide-act" aria-label={m.label} title={m.label}>
+              {m.glyph}
             </Link>
           ))}
         </nav>
-        <div className="flex items-center gap-2 lg:mt-auto">
-          {/* TODO F2: ambil user dari session (next-auth / better-auth) */}
-          <span className="text-sm font-semibold">Budi</span>
-          {/* TODO: wired logout — panggil signOut lalu redirect /login */}
-          <button type="button" className="nb-btn nb-btn-ghost text-sm">
-            Keluar
-          </button>
+        <div className="mt-auto">
+          <LogoutButton />
         </div>
       </aside>
-      <main className="flex-1 p-4 sm:p-8">{children}</main>
+
+      {/* ===== Zona 2: tab bar + konten ===== */}
+      <div className="ide-main">
+        <div className="ide-tabs">
+          <Link href="/dashboard" className="ide-tab active">
+            Dashboard
+          </Link>
+          <a
+            href="https://webuild.vercel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ide-tab"
+          >
+            Site Live
+          </a>
+        </div>
+        <div className="ide-scroll">{children}</div>
+      </div>
+
+      {/* ===== Zona 3: inspektor ===== */}
+      <aside className="ide-inspector" aria-label="Info akun">
+        <h2 className="text-sm font-bold" style={{ fontFamily: "var(--font-heading)" }}>
+          Akun
+        </h2>
+        <p className="text-sm font-semibold" style={{ color: "var(--fg)" }}>
+          {userName}
+        </p>
+        <p className="text-xs" style={{ color: "var(--muted)" }}>
+          {planName === "FREE" ? "Paket gratis" : "Paket PLUS"}
+        </p>
+
+        <div className="nb-card m-0 flex flex-col gap-2 p-4" style={{ borderWidth: 2 }}>
+          <p className="text-xs font-semibold uppercase" style={{ letterSpacing: "0.5px", color: "var(--muted)" }}>
+            Kuota website
+          </p>
+          {/* Angka nyata dari DB — bukan placeholder (R-17) */}
+          <p className="text-2xl font-bold" style={{ fontFamily: "var(--font-heading)" }}>
+            {siteCount}/{planLimit}
+          </p>
+          <div
+            aria-hidden
+            className="h-2 w-full rounded"
+            style={{ background: "var(--ink)", border: "2px solid var(--ink)" }}
+          >
+            <div
+              style={{
+                width: `${Math.min(100, (siteCount / planLimit) * 100)}%`,
+                height: "100%",
+                background: siteCount >= planLimit ? "var(--accent-danger)" : "var(--accent-success)",
+                borderRadius: 4,
+              }}
+            />
+          </div>
+          {siteCount >= planLimit ? (
+            <p className="text-xs" style={{ color: "var(--accent-danger)" }}>
+              Kuota habis — hapus atau upgrade ke PLUS.
+            </p>
+          ) : (
+            <p className="text-xs" style={{ color: "var(--muted)" }}>
+              Sisa {planLimit - siteCount} slot website.
+            </p>
+          )}
+        </div>
+
+        <div className="mt-auto flex flex-col gap-2">
+          <Link href="/dashboard/upgrade" className="nb-btn nb-btn-mint w-full text-sm">
+            Upgrade
+          </Link>
+        </div>
+      </aside>
     </div>
   );
 }

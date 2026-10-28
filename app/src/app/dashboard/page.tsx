@@ -7,6 +7,8 @@ import { AiGenerateForm } from "@/components/dashboard/ai-generate-form";
 import { redirect } from "next/navigation";
 
 // F3: data asli dari Prisma (bukan mock). cookies() wajib dalam <Suspense> (Next 16 Cache Components).
+// Layout: konten dashboard dipadatkan jadi 2 kolom ala IDE — panel builder AI (kiri)
+// dan file explorer daftar site (kanan), di bawah tab bar dari layout 3-zona.
 
 export default function DashboardPage() {
   return (
@@ -33,55 +35,65 @@ async function DashboardInner() {
     status: s.publishedAt ? ("PUBLISHED" as const) : ("DRAFT" as const),
     updatedAt: s.updatedAt.toISOString(),
   }));
+  const planName = user.plan?.name ?? "FREE";
+  const canCreate = sites.length === 0 || planName !== "FREE";
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
       <header className="flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-bold sm:text-3xl" style={{ fontFamily: "var(--font-heading)" }}>
           Halo, {user.name}
         </h1>
-        <span className="nb-badge nb-badge-yellow">{user.plan?.name ?? "FREE"}</span>
+        <span className="nb-badge nb-badge-yellow">{planName}</span>
       </header>
 
-      {/* Kartu AI-first utama */}
-      <section
-        className="nb-card flex flex-col gap-4"
-        style={{ borderWidth: "3px", borderColor: "var(--accent)", background: "var(--surface2)" }}
-      >
-        <h2 className="text-xl font-bold sm:text-2xl" style={{ fontFamily: "var(--font-heading)" }}>
-          Bangun website baru dengan AI
-        </h2>
-        <AiGenerateForm canCreate={sites.length === 0 || (user.plan?.name ?? "FREE") !== "FREE"} />
-      </section>
-
-      {/* F11: Pilih template — grid kartu template siap pakai */}
-      <section className="nb-card flex flex-col gap-4">
-        <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-heading)" }}>
-          Atau mulai dari template
-        </h2>
-        <TemplatePicker canCreate={sites.length === 0 || (user.plan?.name ?? "FREE") !== "FREE"} />
-      </section>
-
-      {/* Daftar site */}
-      <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-bold" style={{ fontFamily: "var(--font-heading)" }}>
-          Website Saya
-        </h2>
-        {sites.length === 0 ? (
-          <div className="nb-card m-0 flex flex-col items-center gap-3 p-8 text-center">
-            <p className="font-semibold">Belum ada website</p>
-            <p className="text-sm" style={{ color: "var(--muted)" }}>
-              Mulai dari prompt AI di atas, atau buat manual tanpa AI.
-            </p>
+      {/* 2 kolom: builder AI (lebar) + explorer site (sempit) */}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        {/* Kolom kiri: AI-first builder */}
+        <section className="flex flex-col gap-6">
+          <div
+            className="nb-card flex flex-col gap-4"
+            style={{ borderWidth: "3px", borderColor: "var(--accent)", background: "var(--surface2)" }}
+          >
+            <h2 className="text-xl font-bold sm:text-2xl" style={{ fontFamily: "var(--font-heading)" }}>
+              Bangun website baru dengan AI
+            </h2>
+            <AiGenerateForm canCreate={canCreate} />
           </div>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {sites.map((s) => (
-              <SiteCard key={s.id} site={s} />
-            ))}
-          </div>
-        )}
-      </section>
+
+          {/* F11: Pilih template — grid kartu template siap pakai */}
+          <section className="nb-card flex flex-col gap-4">
+            <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-heading)" }}>
+              Atau mulai dari template
+            </h2>
+            <TemplatePicker canCreate={canCreate} />
+          </section>
+        </section>
+
+        {/* Kolom kanan: explorer daftar site */}
+        <section className="flex flex-col gap-3">
+          <h2 className="text-lg font-bold" style={{ fontFamily: "var(--font-heading)" }}>
+            Website Saya
+            <span className="ml-2 align-middle text-xs font-semibold" style={{ color: "var(--muted)" }}>
+              {sites.length} file
+            </span>
+          </h2>
+          {sites.length === 0 ? (
+            <div className="nb-card m-0 flex flex-col items-center gap-3 p-8 text-center">
+              <p className="font-semibold">Belum ada website</p>
+              <p className="text-sm" style={{ color: "var(--muted)" }}>
+                Mulai dari prompt AI di samping, atau buat manual tanpa AI.
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {sites.map((s) => (
+                <SiteCard key={s.id} site={s} />
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
