@@ -2,6 +2,7 @@
 
 // F10: Admin panel — 4 tab: Router AI, Users, Moderasi, Statistik + CSV
 import { useCallback, useEffect, useState } from "react";
+import { fetchWithCsrf } from "@/lib/fetch-with-csrf";
 
 type ProviderCfg = { id: string; label: string; isEnabled: boolean; model: string; hasKey: boolean };
 type UserRow = { id: string; name: string; email: string; role: string; plan: string; isActive: boolean; sitesCount: number; canUseAi: boolean; quotaUsed: number };
@@ -36,14 +37,14 @@ function RouterTab() {
   const [msg, setMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/admin/ai-config").then((r) => r.json()).then((d) => {
+    fetchWithCsrf("/api/admin/ai-config").then((r) => r.json()).then((d) => {
       if (d.ok) { setProviders(d.providers); setQuotas(d.quotas); }
     });
   }, []);
 
   const save = useCallback(async () => {
     setSaving(true); setMsg(null);
-    const res = await fetch("/api/admin/ai-config", {
+    const res = await fetchWithCsrf("/api/admin/ai-config", {
       method: "PUT", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ providers, quotas }),
     });
@@ -111,12 +112,12 @@ function UsersTab() {
   const [msg, setMsg] = useState<string | null>(null);
 
   const load = useCallback(() => {
-    fetch("/api/admin/users").then((r) => r.json()).then((d) => d.ok && setUsers(d.users));
+    fetchWithCsrf("/api/admin/users").then((r) => r.json()).then((d) => d.ok && setUsers(d.users));
   }, []);
   useEffect(load, [load]);
 
   async function patch(userId: string, body: Record<string, unknown>) {
-    const res = await fetch("/api/admin/users", {
+    const res = await fetchWithCsrf("/api/admin/users", {
       method: "PATCH", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId, ...body }),
     });
@@ -170,13 +171,13 @@ function ModerasiTab() {
   const [msg, setMsg] = useState<string | null>(null);
 
   const load = useCallback(() => {
-    fetch("/api/admin/sites").then((r) => r.json()).then((d) => d.ok && setSites(d.sites));
+    fetchWithCsrf("/api/admin/sites").then((r) => r.json()).then((d) => d.ok && setSites(d.sites));
   }, []);
   useEffect(load, [load]);
 
   async function unpublish(id: string, slug: string) {
     if (!confirm(`Unpublish "${slug}"? Site jadi 404 segera.`)) return;
-    const res = await fetch(`/api/admin/sites/${id}/unpublish`, { method: "POST" });
+    const res = await fetchWithCsrf(`/api/admin/sites/${id}/unpublish`, { method: "POST" });
     const d = await res.json();
     setMsg(d.ok ? `✔ ${slug} di-unpublish` : `✖ ${d.error}`);
     if (d.ok) load();
@@ -226,7 +227,7 @@ function ModerasiTab() {
 function StatsTab() {
   const [stats, setStats] = useState<Stats | null>(null);
   useEffect(() => {
-    fetch("/api/admin/stats").then((r) => r.json()).then((d) => d.ok && setStats(d.stats));
+    fetchWithCsrf("/api/admin/stats").then((r) => r.json()).then((d) => d.ok && setStats(d.stats));
   }, []);
 
   return (

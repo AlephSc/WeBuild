@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { fetchWithCsrf } from "@/lib/fetch-with-csrf";
 import { Logo } from "@/components/nav";
 import { SEED_TEMPLATE } from "@/lib/block-templates";
 import { useEditorStore } from "@/lib/editor-store";
@@ -37,7 +38,7 @@ export default function EditorShell({ siteId }: { siteId: string }) {
       setSaveState("dirty");
       return;
     }
-    fetch(`/api/sites/${siteId}`)
+    fetchWithCsrf(`/api/sites/${siteId}`)
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error("load gagal"))))
       .then((data) => {
         if (!alive) return;
@@ -60,7 +61,7 @@ export default function EditorShell({ siteId }: { siteId: string }) {
     timerRef.current = setTimeout(async () => {
       setSaveState("saving");
       try {
-        const res = await fetch(`/api/sites/${siteId}`, {
+        const res = await fetchWithCsrf(`/api/sites/${siteId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ blocks }),
@@ -91,12 +92,12 @@ export default function EditorShell({ siteId }: { siteId: string }) {
     setPublishMsg(null);
     try {
       // pastikan draft terbaru tersimpan dulu
-      await fetch(`/api/sites/${siteId}`, {
+      await fetchWithCsrf(`/api/sites/${siteId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ blocks }),
       });
-      const res = await fetch(`/api/sites/${siteId}/publish`, { method: "POST" });
+      const res = await fetchWithCsrf(`/api/sites/${siteId}/publish`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) {
         setPublishMsg(data.error ?? "Publish gagal.");

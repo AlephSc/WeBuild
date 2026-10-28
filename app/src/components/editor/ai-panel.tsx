@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { fetchWithCsrf } from "@/lib/fetch-with-csrf";
 import { useEditorStore } from "@/lib/editor-store";
 import type { Block } from "@/lib/blocks";
 import BlockRenderer from "@/components/blocks/renderer";
@@ -28,7 +29,7 @@ export default function AiPanel() {
     setHasil(null);
     setError(null);
     try {
-      const res = await fetch("/api/ai/generate", {
+      const res = await fetchWithCsrf("/api/ai/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ instruction: instruksi.trim() }),

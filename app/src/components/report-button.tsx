@@ -5,6 +5,7 @@
 // onClick ilegal untuk dilempar ke client (error "Event handlers cannot be
 // passed to Client Component props" saat runtime).
 import { useState } from "react";
+import { fetchWithCsrf } from "@/lib/fetch-with-csrf";
 
 export function ReportButton({ slug }: { slug: string }) {
   const [label, setLabel] = useState("⚠ Laporkan");
@@ -21,7 +22,7 @@ export function ReportButton({ slug }: { slug: string }) {
       onClick={async () => {
         setLabel("Mengirim…");
         try {
-          const res = await fetch("/api/report", {
+          const res = await fetchWithCsrf("/api/report", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ slug }),

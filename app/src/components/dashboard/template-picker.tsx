@@ -3,6 +3,7 @@
 // F11: picker template — grid kartu template, klik = buat site langsung.
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { fetchWithCsrf } from "@/lib/fetch-with-csrf";
 
 type Tpl = { id: string; name: string; emoji: string; description: string };
 
@@ -30,7 +31,7 @@ export function TemplatePicker({ canCreate }: { canCreate: boolean }) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/sites", {
+      const res = await fetchWithCsrf("/api/sites", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: title.trim() || TEMPLATES.find((t) => t.id === tplId)!.name, template: tplId }),

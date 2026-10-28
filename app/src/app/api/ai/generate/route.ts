@@ -6,6 +6,7 @@ import { log } from "@/lib/log";
 import { generateBlocksWithAI } from "@/lib/ai-gateway";
 import { validateBlocks } from "@/lib/site-utils";
 import { getEffectiveProviders, getAiQuota } from "@/lib/ai-config";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 // F8: POST /api/ai/generate
 // Pipeline: verify → kuota atomik (SQL UPDATE ... WHERE) → generate (config runtime F10) → validasi → log
@@ -33,6 +34,10 @@ export async function POST(req: NextRequest) {
   const started = Date.now();
   const session = await getAuthUser();
   if (!session) return NextResponse.json({ ok: false, error: "Tidak terautentikasi" }, { status: 401 });
+
+  // Rate limit: 15 generate / menit per user — lapisan 1 sebelum kuota harian
+  const rl = rateLimit({ key: "ai-gen", id: session.uid, limit: 15, windowMs: 60_000 });
+  if (!rl.ok) return rateLimitResponse(rl.retryAfterSec);
 
   const parsed = BodySchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success)

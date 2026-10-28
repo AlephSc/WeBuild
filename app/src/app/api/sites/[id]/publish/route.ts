@@ -4,6 +4,7 @@ import { getAuthUser } from "@/lib/auth";
 import { log } from "@/lib/log";
 import { validateBlocks } from "@/lib/site-utils";
 import { revalidatePath } from "next/cache";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -14,6 +15,10 @@ const MAX_REVISIONS = 10;
 export async function POST(_req: NextRequest, ctx: Ctx) {
   const session = await getAuthUser();
   if (!session) return NextResponse.json({ ok: false, error: "Tidak terautentikasi" }, { status: 401 });
+
+  // Rate limit: 30 publish / 10 menit per user (brake spam publish/revalidate loop)
+  const rl = rateLimit({ key: "publish", id: session.uid, limit: 30, windowMs: 10 * 60_000 });
+  if (!rl.ok) return rateLimitResponse(rl.retryAfterSec);
 
   const { id } = await ctx.params;
   const site = await prisma.site.findUnique({ where: { id } });

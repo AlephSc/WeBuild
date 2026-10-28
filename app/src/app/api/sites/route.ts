@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
 import { log } from "@/lib/log";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 import { SEED_TEMPLATE, SITE_TEMPLATES, slugify, validateBlocks } from "@/lib/site-utils";
 
 // POST /api/sites — buat site baru (seed template otomatis, enforcement plan)
@@ -17,6 +18,10 @@ const PLAN_SITES: Record<string, number> = { FREE: 1, PLUS: 10 };
 export async function POST(req: NextRequest) {
   const session = await getAuthUser();
   if (!session) return NextResponse.json({ ok: false, error: "Tidak terautentikasi" }, { status: 401 });
+
+  // Rate limit: 10 site / 10 menit per user (plan cap tetap jadi batas utama; ini brake spam)
+  const rl = rateLimit({ key: "site-create", id: session.uid, limit: 10, windowMs: 10 * 60_000 });
+  if (!rl.ok) return rateLimitResponse(rl.retryAfterSec);
 
   const user = await prisma.user.findUnique({ where: { id: session.uid }, include: { plan: true } });
   if (!user || !user.isActive) return NextResponse.json({ ok: false, error: "Akun tidak aktif" }, { status: 403 });

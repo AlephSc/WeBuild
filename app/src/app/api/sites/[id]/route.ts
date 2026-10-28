@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
 import { log } from "@/lib/log";
 import { validateBlocks } from "@/lib/site-utils";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -19,6 +20,11 @@ async function getOwnedSite(id: string, uid: string) {
 export async function GET(_req: NextRequest, ctx: Ctx) {
   const session = await getAuthUser();
   if (!session) return NextResponse.json({ ok: false, error: "Tidak terautentikasi" }, { status: 401 });
+
+  // Rate limit: 60 GET / menit per user
+  const rl = rateLimit({ key: "site-read", id: session.uid, limit: 60, windowMs: 60_000 });
+  if (!rl.ok) return rateLimitResponse(rl.retryAfterSec);
+
   const { id } = await ctx.params;
   const r = await getOwnedSite(id, session.uid);
   if (r.error) return r.error;
@@ -37,6 +43,11 @@ export async function GET(_req: NextRequest, ctx: Ctx) {
 export async function PUT(req: NextRequest, ctx: Ctx) {
   const session = await getAuthUser();
   if (!session) return NextResponse.json({ ok: false, error: "Tidak terautentikasi" }, { status: 401 });
+
+  // Rate limit autosave: 120 update / menit per user (autosave tiap 1.5 detik = 40/menit → aman)
+  const rl = rateLimit({ key: "site-update", id: session.uid, limit: 120, windowMs: 60_000 });
+  if (!rl.ok) return rateLimitResponse(rl.retryAfterSec);
+
   const { id } = await ctx.params;
   const r = await getOwnedSite(id, session.uid);
   if (r.error) return r.error;
@@ -65,6 +76,11 @@ export async function PUT(req: NextRequest, ctx: Ctx) {
 export async function DELETE(_req: NextRequest, ctx: Ctx) {
   const session = await getAuthUser();
   if (!session) return NextResponse.json({ ok: false, error: "Tidak terautentikasi" }, { status: 401 });
+
+  // Rate limit: 10 delete / 10 menit per user
+  const rl = rateLimit({ key: "site-delete", id: session.uid, limit: 10, windowMs: 10 * 60_000 });
+  if (!rl.ok) return rateLimitResponse(rl.retryAfterSec);
+
   const { id } = await ctx.params;
   const r = await getOwnedSite(id, session.uid);
   if (r.error) return r.error;
