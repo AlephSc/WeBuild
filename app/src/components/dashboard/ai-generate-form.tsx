@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchWithCsrf } from "@/lib/fetch-with-csrf";
+import { pushIdeRiwayat } from "./ide-chrome";
 
 export function AiGenerateForm({ canCreate }: { canCreate: boolean }) {
   const router = useRouter();
@@ -32,6 +33,7 @@ export function AiGenerateForm({ canCreate }: { canCreate: boolean }) {
         setError(data.error ?? "AI gagal — coba lagi.");
         return;
       }
+      pushIdeRiwayat(instruksi.trim());
       // 2. buat site dengan judul dari instruksi + blocks AI
       const judul = instruksi.trim().split(/[.,\n]/)[0].slice(0, 60) || "Website Baru";
       const res2 = await fetchWithCsrf("/api/sites", {

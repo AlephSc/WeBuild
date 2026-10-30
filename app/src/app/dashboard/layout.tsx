@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { LogoutButton } from "@/components/dashboard/logout-button";
+import { BottomPanel, StatusBar, IdeChromeClient } from "@/components/dashboard/ide-chrome";
 
 const navItems = [
   { href: "/dashboard", label: "Website Saya", act: "home", glyph: "W" },
@@ -27,7 +28,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const planLimit = planName === "FREE" ? 1 : 10; // sinkron dgn batas AI-form: FREE 1 site, PLUS 10
 
   return (
-    <div className="ide-shell">
+    <IdeChromeFrame
+      userName={userName}
+      planName={planName}
+      siteCount={siteCount}
+      planLimit={planLimit}
+    >
       {/* ===== Zona 1: activity bar ===== */}
       <aside className="ide-activitybar" aria-label="Navigasi dashboard">
         <Link href="/" aria-label="WeBuild — beranda" className="text-xl" style={{ fontFamily: "var(--font-heading)", color: "var(--fg)", fontWeight: 700 }}>
@@ -60,6 +66,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
           >
             Site Live
           </a>
+          <span
+            aria-hidden
+            className="ml-3 hidden self-center text-xs md:inline"
+            style={{ fontFamily: "var(--font-mono)", color: "var(--muted)" }}
+          >
+            workspace / {userName.toLowerCase().replace(/\s+/g, "-")}
+          </span>
         </div>
         <div className="ide-scroll">{children}</div>
       </div>
@@ -67,7 +80,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       {/* ===== Zona 3: inspektor ===== */}
       <aside className="ide-inspector" aria-label="Info akun">
         <h2 className="text-sm font-bold" style={{ fontFamily: "var(--font-heading)" }}>
-          Akun
+          INSPECTOR
         </h2>
         <p className="text-sm font-semibold" style={{ color: "var(--fg)" }}>
           {userName}
@@ -115,6 +128,34 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </Link>
         </div>
       </aside>
-    </div>
+    </IdeChromeFrame>
+  );
+}
+
+// Client wrapper: statusbar + bottom panel butuh state/fetch browser.
+function IdeChromeFrame({
+  userName,
+  planName,
+  siteCount,
+  planLimit,
+  children,
+}: {
+  userName: string;
+  planName: string;
+  siteCount: number;
+  planLimit: number;
+  children: React.ReactNode;
+}) {
+  const masalah: string[] = [];
+  if (siteCount >= planLimit) masalah.push(`Kuota website penuh (${siteCount}/${planLimit}) — upgrade ke PLUS atau hapus site.`);
+  return (
+    <IdeChromeClient
+      planName={planName}
+      siteCount={siteCount}
+      planLimit={planLimit}
+      masalah={masalah}
+    >
+      {children}
+    </IdeChromeClient>
   );
 }

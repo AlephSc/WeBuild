@@ -51,6 +51,9 @@ async function DashboardInner() {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         {/* Kolom kiri: AI-first builder */}
         <section className="flex flex-col gap-6">
+          <p aria-hidden className="ide-cmt">
+            ## ai.generate
+          </p>
           <div
             className="nb-card flex flex-col gap-4"
             style={{ borderWidth: "3px", borderColor: "var(--accent)", background: "var(--surface2)" }}
@@ -62,6 +65,9 @@ async function DashboardInner() {
           </div>
 
           {/* F11: Pilih template — grid kartu template siap pakai */}
+          <p aria-hidden className="ide-cmt">
+            ## templates
+          </p>
           <section className="nb-card flex flex-col gap-4">
             <h2 className="text-xl font-bold" style={{ fontFamily: "var(--font-heading)" }}>
               Atau mulai dari template
@@ -72,6 +78,9 @@ async function DashboardInner() {
 
         {/* Kolom kanan: explorer daftar site */}
         <section className="flex flex-col gap-3">
+          <p aria-hidden className="ide-cmt">
+            ## sites ({sites.length})
+          </p>
           <h2 className="text-lg font-bold" style={{ fontFamily: "var(--font-heading)" }}>
             Website Saya
             <span className="ml-2 align-middle text-xs font-semibold" style={{ color: "var(--muted)" }}>

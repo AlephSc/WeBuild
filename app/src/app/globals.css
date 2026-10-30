@@ -271,9 +271,44 @@ h1, h2, h3, h4 {
 }
 .ide-row:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--shadow-hard); }
 
+/* Header section ala code comment (mono, redup) */
+.ide-cmt {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--muted);
+  text-transform: lowercase;
+}
+.ide-cmt::before { content: "// "; color: var(--accent-success); }
+
+/* Ide-shell dengan chrome (bottom panel + statusbar): kolom utama mengecil */
+.ide-shell.ide-with-chrome {
+  min-height: 100vh;
+}
+.ide-shell.ide-with-chrome .ide-main {
+  min-height: 0;
+}
+
+/* Bottom panel + statusbar span penuh di bawah grid */
+.ide-shell.ide-with-chrome { flex-wrap: wrap; }
+.ide-shell.ide-with-chrome > .ide-activitybar,
+.ide-shell.ide-with-chrome > .ide-main,
+.ide-shell.ide-with-chrome > .ide-inspector {
+  height: auto;
+}
+.ide-shell.ide-with-chrome > .ide-activitybar { height: calc(100vh - 28px); }
+.ide-shell.ide-with-chrome > .ide-inspector { height: calc(100vh - 28px); }
+.ide-shell.ide-with-chrome > .ide-main { height: calc(100vh - 28px); }
+.ide-shell.ide-with-chrome > .ide-bottom { width: 100%; }
+/* statusbar = child terakhir, full width */
+.ide-shell.ide-with-chrome > footer.ide-statusbar { width: 100%; }
+
 /* Mobile: activity bar jadi bottom bar, inspektor pindah ke atas konten */
 @media (max-width: 1023px) {
   .ide-shell { flex-direction: column; }
+  .ide-shell.ide-with-chrome > .ide-activitybar,
+  .ide-shell.ide-with-chrome > .ide-inspector,
+  .ide-shell.ide-with-chrome > .ide-main { height: auto; }
   .ide-activitybar {
     order: 3;
     width: 100%;
